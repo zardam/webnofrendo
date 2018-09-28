@@ -1,0 +1,3 @@
+[submodule "webdfu"]
+	path = webdfu
+	url = https://github.com/devanlai/webdfu.git
