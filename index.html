@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>NES Emulator for NumWorks calculators</title>
   <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="webnofrendo.css">
 </head>
-<p>TOTO: check final size, provide two or three base firmwares, check NES header, add a progress bar fork me on github ? différencier les paneusx d'erreur en forntion des steps</p>
 
 <body ng-app="webnofrendo">
   <a href="https://github.com/zardam/epsilon/tree/nofrendo"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
@@ -14,93 +14,121 @@
     <div class="jumbotron">
       <h1 class="display-4">NES Emulator for NumWorks calculators</h1>
       <p class="lead">Build and install a firmware containing a port of nofrendo NES emulator on the NumWorks calculator</p>
-      <hr class="my-4">
+      <!-- <hr class="my-4">
       <div style="width: 50%;" class="mx-auto embed-responsive embed-responsive-16by9">
         <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/BDVeut56AJU" allowfullscreen></iframe>
-      </div>
+      </div> -->
       <hr class="my-4">
       <div class="alert alert-danger" role="alert" ng-hide="webUSB">
-        Your navigator does not support WebUSB, please use <a href="https://www.google.com/chrome/">Google Chrome</a>
+        Your browser does not support WebUSB, please use <a href="https://www.google.com/chrome/">Google Chrome</a>
       </div>
       <div ng-show="webUSB">
-      <div class="card w-75 mx-auto">
-        <div class="card-body">
-          <h5>Preliminary step</h5>
-          <p>
-            Do an official firmware upgrade. Follow the instructions on the <a href="https://workshop.numworks.com/devices/upgrade">official site</a>.
-            This is needed to setup the requirements for programming the calculator from the web browser.
-          </p>
-<hr/>
-          <h5 class="card-title">Step 1: Choose a ROM</h5>
-          <form>
-            <div class="form-group">
-              <div class="input-group">
-                <div class="custom-file">
-                  <input type="file" class="custom-file-input" id="rom-file-chooser" accept=".rom,.nes" ng-file-select>
-                  <label class="custom-file-label" for="rom-file-chooser">{{romFileName || 'Choose a NES ROM file (.nes or .rom, not a .zip file !)'}}</label>
-                  {{rom}}
+        <div class="card w-75 mx-auto">
+          <div class="card-body">
+
+
+            <h5>Preliminary step & disclaim</h5>
+            <p>
+              Do an official firmware upgrade. Follow the instructions on the <a href="https://workshop.numworks.com/devices/upgrade">official site</a>.
+              This is needed to setup the requirements for programming the calculator from here.
+            </p>
+            <p>If something goes wrong, you can always restore the calculator using this method, so it is better to know how to do it before all.</p>
+            <p>I'm not affiliated with NumWorks. If your calculator is buggy when using this firmware, please restore the offical and try again.</p>
+            <hr />
+            <h5 class="card-title">Step 1: Choose a ROM</h5>
+            <form>
+              <div class="form-group">
+                <div class="input-group">
+                  <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="rom-file-chooser" accept=".rom,.nes" ng-file-select>
+                    <label class="custom-file-label" for="rom-file-chooser">{{romFileName || 'Choose a NES ROM file (.nes or .rom, not a .zip file !)'}}</label>
+                    {{rom}}
+                  </div>
                 </div>
               </div>
-            </div>
             </form>
-            <hr/>
-            <h5 class="card-title">Step 2: Choose a base firmware</h5>
-            <p>You can only choose a firmware that will fit within the memory of the calculator (including the ROM).</p>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="option1" checked>
-              <label class="form-check-label" for="exampleRadios1">
-                Minimal: only NES emulator
-              </label>
+            <div class="alert alert-danger" role="alert" ng-show="romError" style="margin-top: 10px;">
+              Error: {{romError}}
             </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios2" value="option2">
-              <label class="form-check-label" for="exampleRadios2">
-                Medium: Calculation, Python and NES emulator
-              </label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios3" value="option3" disabled>
-              <label class="form-check-label" for="exampleRadios3">
-                Full: all the stock apps and NES emulator
-              </label>
-            </div>
-            <hr/>
-            <h5 class="card-title">Step 3: Upload</h5>
-            <div class="form-group">
-              <p>Connect the calculator to a USB port and push the reset button on the back. When asked to choose a device, select "STM32 BOOTLOADER"</p>
-              <p></p>
-              <p>If something goes wrong, do the official firmware upgrade again (event if the calculator do not power up, and do not forget to push the reset button AFTER connecting it to the computer)</p>
-              <p>WARNING: Use at you own risk</p>
-              <button type="button" class="btn btn-primary" ng-click="connect()">Upload</button>
+            <hr />
 
-              <div class="alert alert-danger" role="alert" ng-show="error" style="margin-top: 10px;">
-                Error : {{error}}
+            <div ng-class="(romLoaded && !firmwareError) ? '' : 'disabled'">
+              <h5 class="card-title">Step 2: Choose a base firmware</h5>
+              <p>You can only choose a firmware that will fit within the memory of the calculator (including the ROM, less than {{1024*1024}} bytes).</p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="firmwareRadios" id="firmwareFull" value="epsilon-full.bin" ng-disabled="!epsilonFull || !(romLoaded && !firmwareError) || (epsilonFull.byteLength + rom.byteLength > 1024*1024)" ng-model="selectedFirmware">
+                <label class="form-check-label" for="firmwareFull">
+                  Full: all the stock apps and NES emulator <span ng-hide="epsilonFull">(loading...)</span><span ng-show="epsilonFull">({{epsilonFull.byteLength}} bytes<span ng-show="romLoaded">, total {{epsilonFull.byteLength + rom.byteLength}} bytes</span>)</span>
+                </label>
               </div>
-            </div>
-            <hr/>
-            <h5 class="card-title">Step 4: Enjoy !</h5>
-            <p>Controls:
-            <ul>
-            <li>Up, Down, Left, Right</li>
-            <li>Home: Select</li>
-            <li>Power: Start</li>
-            <li>OK: A</li>
-            <li>Back: B</li>
-            <li>Any other: Exit</li>
-          </ul></p>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="firmwareRadios" id="firmwareMedium" value="epsilon-medium.bin" ng-disabled="!epsilonMedium || !(romLoaded && !firmwareError) || (epsilonMedium.byteLength + rom.byteLength > 1024*1024)" ng-model="selectedFirmware">
+                <label class="form-check-label" for="firmwareMedium">
+                  Medium: Calculation, Graph, Python and NES emulator <span ng-hide="epsilonMedium">(loading...)</span><span ng-show="epsilonMedium">({{epsilonMedium.byteLength}} bytes<span ng-show="romLoaded">, total {{epsilonMedium.byteLength + rom.byteLength}} bytes</span>)</span>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="firmwareRadios" id="firmwareMin" value="epsilon-min.bin" ng-disabled="!epsilonMin || !(romLoaded && !firmwareError) || (epsilonMin.byteLength + rom.byteLength > 1024*1024)" ng-model="selectedFirmware">
+                <label class="form-check-label" for="firmwareMin">
+                  Minimal: only NES emulator <span ng-hide="epsilonMin">(loading...)</span><span ng-show="epsilonMin">({{epsilonMin.byteLength}} bytes<span ng-show="romLoaded">, total {{epsilonMin.byteLength + rom.byteLength}} bytes</span>)</span>
+                </label>
+              </div>
+              <div class="alert alert-danger" role="alert" ng-show="firmwareError" style="margin-top: 10px;">
+                Error: {{firmwareError}}
+              </div>
+              <hr />
             </div>
 
+            <div ng-class="selectedFirmware ? '' : 'disabled'">
+              <h5 class="card-title">Step 3: Upload</h5>
+              <div class="form-group">
+                <p>Connect the calculator to a USB port and push the reset button on the back, then click the upload button.</p>
+                <p>When asked to choose a device, select "STM32 BOOTLOADER"</p>
+                <p><button ng-disabled="!selectedFirmware" type="button" class="btn btn-primary" ng-click="upload()">Upload</button></p>
+                <p>
+                  <div>
+                    <br/>
+                    <p>{{lastAction || 'Progress'}}</p>
+                    <div class="progress">
+                      <div class="progress-bar" role="progressbar" style="width: {{progress}}%"></div>
+                    </div>
+                  </div>
+                </p>
+                <p>If something goes wrong, do the official firmware upgrade again, even if the calculator does not power up. Do not forget to push the reset button AFTER connecting it to the computer !</p>
+                <p>WARNING: Use at you own risk</p>
+                <div class="alert alert-danger" role="alert" ng-show="error" style="margin-top: 10px;">
+                  Error: {{error}}
+                </div>
+              </div>
+              <hr />
+            </div>
+
+            <div ng-class="allDone ? '' : 'disabled'">
+              <h5 class="card-title">Step 4: Enjoy !</h5>
+              <p>Controls:
+                <ul>
+                  <li>Up, Down, Left, Right</li>
+                  <li>Home: Select</li>
+                  <li>Power: Start</li>
+                  <li>OK: B</li>
+                  <li>Back: A</li>
+                  <li>Any other: Exit</li>
+                </ul>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
 
-<hr class="my-4">
-<h2>Credits:</h2>
-<ul>
-      <li><a href="https://github.com/numworks/epsilon">NumWorks original firmware</a></li>
-      <li><a href="https://github.com/devanlai/webdfu">WebDFU upload from devanlai</a></li>
-      <li><a href="http://baisoku.org/">nofrendo NES emulator</a></li>
-</ul>
+      <hr class="my-4">
+      <h2>Credits:</h2>
+      <ul>
+        <li><a href="https://www.numworks.com/">NumWorks</a></li>
+        <li><a href="https://github.com/numworks/epsilon">NumWorks original firmware</a></li>
+        <li><a href="https://github.com/devanlai/webdfu">WebDFU</a></li>
+        <li><a href="http://baisoku.org/">nofrendo NES emulator</a></li>
+      </ul>
 
     </div>
   </div>
@@ -111,4 +139,5 @@
   <script src="webnofrendo.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
 </body>
+
 </html>
