@@ -41,27 +41,24 @@ angular.module('webnofrendo', []).controller('main', function($scope, $http) {
     });
   };
 
-  $http.get("epsilon-full.bin", {responseType: "arraybuffer"})
-  .then(function(response) {
-    $scope.epsilonFull = response.data;
-  }, function(error) {
-    console.log(error);
-    $scope.firmwareError = "Unable to load firmware";
-  });
-  $http.get("epsilon-medium.bin", {responseType: "arraybuffer"})
-  .then(function(response) {
-    $scope.epsilonMedium = response.data;
-  }, function(error) {
-    console.log(error);
-    $scope.firmwareError = "Unable to load firmware";
-  });
-  $http.get("epsilon-min.bin", {responseType: "arraybuffer"})
-  .then(function(response) {
-    $scope.epsilonMin = response.data;
-  }, function(error) {
-    console.log(error);
-    $scope.firmwareError = "Unable to load firmware";
-  });
+  $scope.firmwares = [
+    {name: "epsilon-full.bin", desc: "Full PAL: all the stock apps and NES emulator"},
+    {name: "epsilon-full-60.bin", desc: "Full NTSC: all the stock apps and NES emulator"},
+    {name: "epsilon-medium.bin", desc: "Medium PAL: Calculation, Graph, Python and NES emulator"},
+    {name: "epsilon-medium-60.bin", desc: "Medium NTSC: Calculation, Graph, Python and NES emulator"},
+    {name: "epsilon-min.bin", desc: "Minimal PAL: only NES emulator"},
+    {name: "epsilon-min-60.bin", desc: "Minimal NTSC: only NES emulator"}
+  ];
+
+  $scope.firmwares.forEach( f => {
+    $http.get(f.name, {responseType: "arraybuffer"})
+    .then(function(response) {
+      f.data = response.data;
+    }, function(error) {
+      console.log(error);
+      $scope.firmwareError = "Unable to load firmware";
+    });
+  })
 
   var appendBuffer = function(buffer1, buffer2) {
     var tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
@@ -69,18 +66,6 @@ angular.module('webnofrendo', []).controller('main', function($scope, $http) {
     tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
     return tmp.buffer;
   };
-
-  var getFirmware = function() {
-    if($scope.selectedFirmware === 'epsilon-full.bin') {
-      return $scope.epsilonFull;
-    } else if($scope.selectedFirmware === 'epsilon-medium.bin') {
-      return $scope.epsilonMedium;
-    } else if($scope.selectedFirmware === 'epsilon-min.bin') {
-      return $scope.epsilonMin;
-    } else {
-      throw "Unknown firmware file"
-    }
-  }
 
   $scope.upload = function() {
     delete $scope.error;
@@ -121,7 +106,7 @@ angular.module('webnofrendo', []).controller('main', function($scope, $http) {
             $scope.lastAction = message;
           })
         }
-        await device.do_download(2048, appendBuffer(getFirmware(), $scope.rom), false).then(
+        await device.do_download(2048, appendBuffer($scope.selectedFirmware.data, $scope.rom), false).then(
           () => {
             console.log("done");
             $scope.$apply(function() {
