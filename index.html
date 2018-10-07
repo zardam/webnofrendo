@@ -59,7 +59,7 @@
               <div class="form-check" ng-repeat="f in firmwares">
                 <input class="form-check-input" type="radio" name="firmwareRadios" ng-value="f" ng-disabled="!f.data || !(romLoaded && !firmwareError) || (f.data.byteLength + rom.byteLength > 1024*1024)" ng-model="$parent.selectedFirmware">
                 <label class="form-check-label" for="firmwareFull">
-                  {{f.desc}} <span ng-hide="f.data">(loading...)</span><span ng-show="f.data">({{f.data.byteLength}} bytes<span ng-show="romLoaded">, total {{epsilonFull.byteLength + rom.byteLength}} bytes</span>)</span>
+                  {{f.desc}} <span ng-hide="f.data">(loading...)</span><span ng-show="f.data">({{f.data.byteLength}} bytes<span ng-show="romLoaded">, total {{f.data.byteLength + rom.byteLength}} bytes</span>)</span>
                 </label>
               </div>
               <div class="alert alert-danger" role="alert" ng-show="firmwareError" style="margin-top: 10px;">
