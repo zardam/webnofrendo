@@ -106,7 +106,7 @@ angular.module('webnofrendo', []).controller('main', function($scope, $http) {
             $scope.lastAction = message;
           })
         }
-        await device.do_download(2048, appendBuffer($scope.selectedFirmware.data, $scope.rom), false).then(
+        await device.do_download(2048, appendBuffer($scope.selectedFirmware.data, $scope.rom), true).then(
           () => {
             console.log("done");
             $scope.$apply(function() {

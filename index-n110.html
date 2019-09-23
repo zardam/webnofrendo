@@ -37,7 +37,7 @@
             <div class="card text-white bg-danger mb-3">
               <div class="card-body">
                 <h5 class="card-title">WARNING</h5>
-                <p class="card-text">This page will only work with the <b>OLD HARDWARE REVISION (N100)</b> of the NumWorks calculator !<br><a href="index-n110.html">Please go here for the new hardware revision (N110)</a></p>
+                <p class="card-text">This page will only work with the <b>NEW HARDWARE REVISION (N110)</b> of the NumWorks calculator !<br><a href="index.html">Please go here for the old hardware revision (N100)</a></p>
               </div>
             </div>
             <hr />
@@ -60,13 +60,12 @@
 
             <div ng-class="(romLoaded && !firmwareError) ? '' : 'disabled'">
               <h5 class="card-title">Step 2: Choose a base firmware</h5>
-              <p>The firmwares provided here are based on version 10.1.0</p>
-              <p>You can only choose a firmware that will fit within the memory of the calculator (including the ROM, less than {{1024*1024}} bytes).</p>
-              <p>You must also choose a version corresponding to the origin of the ROM. For US/JP choose NTSC, for EUR choose PAL</p>
+              <p>The firmwares provided here are based on version 12.0.0</p>
+              <p>You must choose a version corresponding to the origin of the ROM. For US/JP choose NTSC, for EUR choose PAL</p>
               <div class="form-check" ng-repeat="f in firmwares">
-                <input class="form-check-input" type="radio" name="firmwareRadios" ng-value="f" ng-disabled="!f.data || !(romLoaded && !firmwareError) || (f.data.byteLength + rom.byteLength > 1024*1024)" ng-model="$parent.selectedFirmware">
+                <input class="form-check-input" type="radio" name="firmwareRadios" ng-value="f" ng-disabled="!f.data_internal || !f.data_external || !(romLoaded && !firmwareError) || rom.byteLength > 4096*1024" ng-model="$parent.selectedFirmware">
                 <label class="form-check-label" for="firmwareFull">
-                  {{f.desc}} <span ng-hide="f.data">(loading...)</span><span ng-show="f.data">({{f.data.byteLength}} bytes<span ng-show="romLoaded">, total {{f.data.byteLength + rom.byteLength}} bytes</span>)</span>
+                  {{f.desc}} <span ng-hide="f.data_internal && f.data_external">(loading...)</span>
                 </label>
               </div>
               <div class="alert alert-danger" role="alert" ng-show="firmwareError" style="margin-top: 10px;">
@@ -78,8 +77,8 @@
             <div ng-class="selectedFirmware ? '' : 'disabled'">
               <h5 class="card-title">Step 3: Upload</h5>
               <div class="form-group">
-                <p>Connect the calculator to a USB port and push the reset button on the back, then click the upload button.</p>
-                <p>When asked to choose a device, select "STM32 BOOTLOADER"</p>
+                <p>Connect the calculator to a USB port, then click the upload button. The calculator must be on the "The calculator is connected" screen.</p>
+                <p>When asked to choose a device, select "NumWorks Calculator"</p>
                 <p><button ng-disabled="!selectedFirmware" type="button" class="btn btn-primary" ng-click="upload()">Upload</button></p>
                 <p>
                   <div>
@@ -90,7 +89,7 @@
                     </div>
                   </div>
                 </p>
-                <p>If something goes wrong, do the official firmware upgrade again, even if the calculator does not power up. Do not forget to push the reset button AFTER connecting it to the computer !</p>
+                <p>If something goes wrong, do the official firmware upgrade again</p>
                 <p>WARNING: Use at you own risk</p>
                 <div class="alert alert-danger" role="alert" ng-show="error" style="margin-top: 10px;">
                   Error: {{error}}
@@ -133,7 +132,7 @@
   <script src="angularjs/angular.min.js"></script>
   <script src="webdfu/dfu-util/dfu.js"></script>
   <script src="webdfu/dfu-util/dfuse.js"></script>
-  <script src="webnofrendo.js"></script>
+  <script src="webnofrendo-n110.js"></script>
   <script src="bootstrap/js/bootstrap.min.js"></script>
 </body>
 
