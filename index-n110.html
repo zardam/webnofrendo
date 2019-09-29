@@ -60,7 +60,7 @@
 
             <div ng-class="(romLoaded && !firmwareError) ? '' : 'disabled'">
               <h5 class="card-title">Step 2: Choose a base firmware</h5>
-              <p>The firmwares provided here are based on version 12.0.0</p>
+              <p>The firmwares provided here are based on version 12.1.0</p>
               <p>You must choose a version corresponding to the origin of the ROM. For US/JP choose NTSC, for EUR choose PAL</p>
               <div class="form-check" ng-repeat="f in firmwares">
                 <input class="form-check-input" type="radio" name="firmwareRadios" ng-value="f" ng-disabled="!f.data_internal || !f.data_external || !(romLoaded && !firmwareError) || rom.byteLength > 4096*1024" ng-model="$parent.selectedFirmware">
